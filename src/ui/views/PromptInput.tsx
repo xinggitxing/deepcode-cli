@@ -53,9 +53,11 @@ import {
 } from "../hooks";
 import SlashCommandMenu, { isSkillSelected } from "./SlashCommandMenu";
 import type { ModelConfigSelection, PermissionScope } from "../../settings";
-import { FileMentionMenu, ModelsDropdown, RawModelDropdown, SkillsDropdown } from "../components";
+import { FileMentionMenu, ConfigDropdown, ModelsDropdown, RawModelDropdown, SkillsDropdown } from "../components";
 import type { SessionEntry, SkillInfo } from "../../session";
 import type { UserToolPermission } from "../../common/permissions";
+import { t } from "../../common/i18n";
+import type { Locale } from "../../common/i18n";
 
 export type PromptSubmission = {
   text: string;
@@ -197,7 +199,7 @@ export const PromptInput = React.memo(function PromptInput({
       ? loadingText && loadingText.trim()
         ? `${loadingText}${processOrPasteHint}`
         : `esc to interrupt · ctrl+c to cancel input${processOrPasteHint}`
-      : `enter send · shift+enter newline · @ files · ctrl+v image · / commands · ctrl+d exit${processOrPasteHint}`;
+      : t("ui.promptInput.footer") + processOrPasteHint;
   useTerminalFocusReporting(stdout, !disabled);
   useTerminalExtendedKeys(stdout, !disabled);
   useBracketedPaste(stdout, !disabled);
@@ -289,7 +291,7 @@ export const PromptInput = React.memo(function PromptInput({
         }
         if (busy) {
           onInterrupt();
-          setStatusMessage("Interrupting…");
+          setStatusMessage(t("ui.promptInput.interrupting"));
         }
         return;
       }
@@ -315,20 +317,20 @@ export const PromptInput = React.memo(function PromptInput({
         }
         lastCtrlDAt.current = now;
         setPendingExit(true);
-        setStatusMessage("press ctrl+d again to exit");
+        setStatusMessage(t("ui.promptInput.pressCtrlDAgain"));
         return;
       }
 
       if (key.ctrl && (input === "c" || input === "C")) {
         if (busy) {
           onInterrupt();
-          setStatusMessage("Interrupting…");
+          setStatusMessage(t("ui.promptInput.interrupting"));
         } else if (!isEmpty(buffer)) {
           setBuffer(EMPTY_BUFFER);
           clearUndoRedoStacks();
           resetPastes();
         } else {
-          setStatusMessage("press ctrl+d to exit");
+          setStatusMessage(t("ui.promptInput.pressCtrlDExit"));
         }
         return;
       }
@@ -351,18 +353,18 @@ export const PromptInput = React.memo(function PromptInput({
       }
 
       if (key.ctrl && (input === "v" || input === "V")) {
-        setStatusMessage("Reading clipboard...");
+        setStatusMessage(t("ui.promptInput.readingClipboard"));
         readClipboardImageAsync()
           .then((image) => {
             if (image) {
               setImageUrls((prev) => [...prev, image.dataUrl]);
-              setStatusMessage("Attached image from clipboard");
+              setStatusMessage(t("ui.promptInput.imageAttached"));
             } else {
-              setStatusMessage("No image found in clipboard");
+              setStatusMessage(t("ui.promptInput.noImageFound"));
             }
           })
           .catch(() => {
-            setStatusMessage("Failed to read clipboard");
+            setStatusMessage(t("ui.promptInput.failedClipboard"));
           });
         return;
       }
@@ -370,9 +372,9 @@ export const PromptInput = React.memo(function PromptInput({
       if (isClearImageAttachmentsShortcut(input, key)) {
         if (imageUrls.length > 0) {
           setImageUrls([]);
-          setStatusMessage("Cleared attached images");
+          setStatusMessage(t("ui.promptInput.clearedImages"));
         } else {
-          setStatusMessage("No attached images to clear");
+          setStatusMessage(t("ui.promptInput.noImagesToClear"));
         }
         return;
       }
@@ -406,7 +408,7 @@ export const PromptInput = React.memo(function PromptInput({
       }
 
       if (busy && isPlainReturn) {
-        setStatusMessage("wait for the current response or press esc to interrupt");
+        setStatusMessage(t("ui.promptInput.waitForResponse"));
         return;
       }
 
@@ -589,6 +591,106 @@ export const PromptInput = React.memo(function PromptInput({
     });
   }
 
+  function handlePaste(pastedText: string): void {
+    const totalChars = pastedText.length;
+
+    if (totalChars <= 1000) {
+      const newlineCount = (pastedText.match(/\n/g) ?? []).length;
+      if (newlineCount <= 9) {
+        const clean = pastedText
+          .replace(/\r\n|\r/g, "\n")
+          .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "")
+          .replace(/\t/g, "    ");
+        updateBuffer((s) => insertText(s, clean));
+        return;
+      }
+    }
+
+    // Large paste: store raw text, insert marker with line/char count.
+    const lineCount = (pastedText.match(/\n/g) ?? []).length + 1;
+    pasteCounterRef.current += 1;
+    const pasteId = pasteCounterRef.current;
+    pastesRef.current.set(pasteId, pastedText);
+
+    const marker =
+      lineCount > 10 ? `[paste #${pasteId} +${lineCount} lines]` : `[paste #${pasteId} ${totalChars} chars]`;
+
+    updateBuffer((s) => insertText(s, marker));
+  }
+
+  function expandPasteMarkerAtCursor(): void {
+    // First, try to collapse an already-expanded region at the cursor.
+    for (const [id, region] of expandedRegionsRef.current) {
+      if (buffer.cursor >= region.start && buffer.cursor <= region.end) {
+        // Collapse back to marker.
+        expandedRegionsRef.current.delete(id);
+        pastesRef.current.set(id, region.content);
+        setTimeout(() => {
+          updateBuffer((s) => {
+            const text = s.text.slice(0, region.start) + region.marker + s.text.slice(region.end);
+            return { text, cursor: region.start + region.marker.length };
+          });
+        }, 0);
+        return;
+      }
+    }
+
+    // No expanded region at cursor — try to expand a paste marker.
+    const marker = findPasteMarkerContaining(buffer);
+    if (!marker) {
+      setStatusMessage(t("ui.promptInput.noPasteMarker"));
+      return;
+    }
+    const content = pastesRef.current.get(marker.id);
+    if (!content) {
+      setStatusMessage(t("ui.promptInput.pasteNotFound"));
+      return;
+    }
+
+    const pasteId = marker.id;
+    const originalMarker = buffer.text.slice(marker.start, marker.end);
+    pastesRef.current.delete(pasteId);
+
+    setTimeout(() => {
+      updateBuffer((s) => {
+        const text = s.text.slice(0, marker.start) + cleanPasteContent(content) + s.text.slice(marker.end);
+        const newEnd = marker.start + content.length;
+        expandedRegionsRef.current.set(pasteId, {
+          start: marker.start,
+          end: newEnd,
+          content,
+          marker: originalMarker,
+        });
+        return { text, cursor: marker.start };
+      });
+    }, 0);
+  }
+
+  function navigateHistory(direction: -1 | 1): void {
+    if (promptHistory.length === 0) {
+      return;
+    }
+
+    const previousCursor = historyCursor === -1 ? promptHistory.length : historyCursor;
+    const nextCursor = Math.max(0, Math.min(promptHistory.length, previousCursor + direction));
+    const draft = historyCursor === -1 ? buffer.text : draftBeforeHistory;
+
+    if (historyCursor === -1) {
+      setDraftBeforeHistory(buffer.text);
+    }
+
+    if (nextCursor === promptHistory.length) {
+      const text = draft ?? "";
+      setBuffer({ text, cursor: text.length });
+      setHistoryCursor(-1);
+      setDraftBeforeHistory(null);
+      return;
+    }
+
+    const text = promptHistory[nextCursor] ?? "";
+    setBuffer({ text, cursor: text.length });
+    setHistoryCursor(nextCursor);
+  }
   function insertFileMentionSelection(item: FileMentionItem): void {
     if (!fileMentionToken) {
       return;
@@ -609,7 +711,7 @@ export const PromptInput = React.memo(function PromptInput({
 
   function handleSlashSelection(item: SlashCommandItem): void {
     if (busy && item.kind !== "exit") {
-      setStatusMessage("wait for the current response or press esc to interrupt");
+      setStatusMessage(t("ui.promptInput.waitForResponse"));
       return;
     }
 
@@ -675,7 +777,7 @@ export const PromptInput = React.memo(function PromptInput({
 
   function submitCurrentBuffer(): void {
     if (busy) {
-      setStatusMessage("wait for the current response or press esc to interrupt");
+      setStatusMessage(t("ui.promptInput.waitForResponse"));
       return;
     }
 

@@ -1,3 +1,4 @@
+import { t } from "../../common/i18n";
 import type { SkillInfo } from "../../session";
 
 export type SlashCommandKind =
@@ -27,31 +28,31 @@ export const BUILTIN_SLASH_COMMANDS: SlashCommandItem[] = [
     kind: "skills",
     name: "skills",
     label: "/skills",
-    description: "List available skills",
+    description: t("ui.slashCommands.skillsDesc"),
   },
   {
     kind: "model",
     name: "model",
     label: "/model",
-    description: "Select model, thinking mode and effort control",
+    description: t("ui.slashCommands.modelDesc"),
   },
   {
     kind: "new",
     name: "new",
     label: "/new",
-    description: "Start a fresh conversation",
+    description: t("ui.slashCommands.newDesc"),
   },
   {
     kind: "init",
     name: "init",
     label: "/init",
-    description: "Initialize an AGENTS.md file with instructions for LLM",
+    description: t("ui.slashCommands.initDesc"),
   },
   {
     kind: "resume",
     name: "resume",
     label: "/resume",
-    description: "Pick a previous conversation to continue",
+    description: t("ui.slashCommands.resumeDesc"),
   },
   {
     kind: "continue",
@@ -63,26 +64,26 @@ export const BUILTIN_SLASH_COMMANDS: SlashCommandItem[] = [
     kind: "undo",
     name: "undo",
     label: "/undo",
-    description: "Restore code and/or conversation to a previous point",
+    description: t("ui.slashCommands.undoDesc"),
   },
   {
     kind: "mcp",
     name: "mcp",
     label: "/mcp",
-    description: "Show MCP server status and available tools",
+    description: t("ui.slashCommands.mcpDesc"),
   },
   {
     kind: "raw",
     name: "raw",
     label: "/raw",
     args: ["lite", "normal", "raw-scrollback"],
-    description: "Toggle display mode for viewing or collapsing reasoning content",
+    description: t("ui.slashCommands.rawDesc"),
   },
   {
     kind: "exit",
     name: "exit",
     label: "/exit",
-    description: "Quit Deep Code CLI",
+    description: t("ui.slashCommands.exitDesc"),
   },
 ];
 
@@ -91,7 +92,7 @@ export function buildSlashCommands(skills: SkillInfo[]): SlashCommandItem[] {
     kind: "skill",
     name: skill.name,
     label: `/${skill.name}`,
-    description: skill.description || "(no description)",
+    description: skill.description || t("ui.slashCommands.noDescription"),
     skill,
   }));
   return [...skillItems, ...BUILTIN_SLASH_COMMANDS];
@@ -118,7 +119,7 @@ export function findExactSlashCommand(items: SlashCommandItem[], token: string):
 }
 
 export function formatSlashCommandDescription(description: string): string {
-  return (description || "(no description)").trim().replace(/\s+/g, " ");
+  return (description || t("ui.slashCommands.noDescription")).trim().replace(/\s+/g, " ");
 }
 
 export function formatSlashCommandLabel(item: SlashCommandItem): string {

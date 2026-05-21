@@ -9,7 +9,8 @@
       "changes": "└ Changes",
       "plan": "└ Plan",
       "result": "└ Result",
-      "toolName": "Tool"
+      "toolName": "Tool",
+      "imageAttachment": "image(s)"
     },
     "promptInput": {
       "interrupting": "Interrupting…",
@@ -18,6 +19,8 @@
       "readingClipboard": "Reading clipboard...",
       "failedClipboard": "Failed to read clipboard",
       "clearedImages": "Cleared attached images",
+      "noImagesToClear": "No attached images to clear",
+      "placeholder": "Type your message...",
       "waitForResponse": "wait for the current response or press esc to interrupt",
       "pressCtrlDExit": "press ctrl+d to exit",
       "pressCtrlDAgain": "press ctrl+d again to exit",

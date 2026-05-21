@@ -33,6 +33,9 @@ function getExtensionRoot(): string {
   return levels === 1
     ? path.resolve(path.dirname(currentFile), "..")
     : path.resolve(path.dirname(currentFile), "..", "..");
+  // In tsx/dev mode, import.meta.url points to src/common/i18n.ts,
+  // so we need to go up 2 levels to reach the project root.
+  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 }
 
 function flattenKeys(obj: Record<string, unknown>, prefix = ""): Record<string, string> {

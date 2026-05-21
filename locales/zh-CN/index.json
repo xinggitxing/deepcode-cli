@@ -9,7 +9,8 @@
       "changes": "└ 变更",
       "plan": "└ 计划",
       "result": "└ 结果",
-      "toolName": "工具"
+      "toolName": "工具",
+      "imageAttachment": "张图片"
     },
     "promptInput": {
       "interrupting": "正在中断…",
@@ -18,6 +19,8 @@
       "readingClipboard": "正在读取剪贴板...",
       "failedClipboard": "读取剪贴板失败",
       "clearedImages": "已清除粘贴的图片",
+      "noImagesToClear": "没有需要清除的图片",
+      "placeholder": "输入你的消息...",
       "waitForResponse": "请等待当前响应完成，或按 esc 中断",
       "pressCtrlDExit": "按 ctrl+d 退出",
       "pressCtrlDAgain": "再按一次 ctrl+d 退出",

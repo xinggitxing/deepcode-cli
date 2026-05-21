@@ -22,6 +22,9 @@ import {
 import { PermissionPrompt, type PermissionPromptResult } from "./PermissionPrompt";
 import { buildExitSummaryText } from "../exit-summary";
 import { RawMode, useRawModeContext } from "../contexts";
+import { useI18n } from "../contexts/i18n";
+import { t } from "../../common/i18n";
+import type { Locale } from "../../common/i18n";
 import { renderMessageToStdout } from "../components/MessageView/utils";
 import {
   buildPromptDraftFromSessionMessage,
@@ -797,6 +800,13 @@ function App({ projectRoot, initialPrompt, onRestart }: AppProps): React.ReactEl
           onInterrupt={handleInterrupt}
           onToggleProcessStdout={handleToggleProcessStdout}
           placeholder="Type your message..."
+          placeholder={t("ui.promptInput.placeholder")}
+          currentLocale={locale}
+          currentThinkingLocale={thinkingLocale}
+          currentReplyLocale={replyLocale}
+          onLocaleChange={handleLocaleChange}
+          onThinkingLocaleChange={handleThinkingLocaleChange}
+          onReplyLocaleChange={handleReplyLocaleChange}
         />
       )}
     </Box>

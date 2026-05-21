@@ -1,3 +1,4 @@
+import { t } from "../common/i18n";
 import React, { useState, useMemo, useCallback } from "react";
 import { Box, Text, useInput, useWindowSize } from "ink";
 import type { McpServerStatus } from "../../mcp/mcp-manager";
@@ -54,7 +55,7 @@ export function McpStatusList({ statuses, onCancel, onReconnect }: Props): React
     );
   }
 
-  if (viewMode === "server-detail") {
+  if (viewMode === t("ui.mcp.serverDetail")) {
     return (
       <ServerDetailView
         server={statuses[selectedServerIndex]}
@@ -173,10 +174,10 @@ function ServerListView({
     }
   });
 
-  const readyCount = statuses.filter((s) => s.status === "ready").length;
+  const readyCount = statuses.filter((s) => s.status === t("ui.mcp.statusReady")).length;
   const startingCount = statuses.filter((s) => s.status === "starting").length;
-  const reconnectingCount = statuses.filter((s) => s.status === "reconnecting").length;
-  const failedCount = statuses.filter((s) => s.status === "failed").length;
+  const reconnectingCount = statuses.filter((s) => s.status === t("ui.mcp.statusReconnecting")).length;
+  const failedCount = statuses.filter((s) => s.status === t("ui.mcp.statusFailed")).length;
 
   return (
     <Box
@@ -256,20 +257,26 @@ function ServerRow({
   labelColumnWidth: number;
 }): React.ReactElement {
   const icon =
-    status.status === "ready" ? "✓" : status.status === "failed" ? "✗" : status.status === "reconnecting" ? "↻" : "●";
+    status.status === t("ui.mcp.statusReady")
+      ? "✓"
+      : status.status === t("ui.mcp.statusFailed")
+        ? "✗"
+        : status.status === t("ui.mcp.statusReconnecting")
+          ? "↻"
+          : "●";
   const color =
-    status.status === "ready"
+    status.status === t("ui.mcp.statusReady")
       ? "green"
-      : status.status === "failed"
+      : status.status === t("ui.mcp.statusFailed")
         ? "red"
-        : status.status === "reconnecting"
+        : status.status === t("ui.mcp.statusReconnecting")
           ? "#ff9900"
           : "yellow";
 
   // 加载动画：循环显示 (空) → . → .. → ... → (空) → ...
   const [dots, setDots] = React.useState(0);
   React.useEffect(() => {
-    if (status.status !== "starting" && status.status !== "reconnecting") return;
+    if (status.status !== "starting" && status.status !== t("ui.mcp.statusReconnecting")) return;
     const interval = setInterval(() => {
       setDots((d) => (d + 1) % 4);
     }, 500);
@@ -277,11 +284,11 @@ function ServerRow({
   }, [status.status]);
 
   const detail =
-    status.status === "ready"
+    status.status === t("ui.mcp.statusReady")
       ? `Ready (${status.toolCount} tools, ${status.promptCount} prompts, ${status.resourceCount} resources)`
-      : status.status === "failed"
+      : status.status === t("ui.mcp.statusFailed")
         ? `Failed`
-        : status.status === "reconnecting"
+        : status.status === t("ui.mcp.statusReconnecting")
           ? `Reconnecting${dots > 0 ? ".".repeat(dots) : "   "}`
           : "Starting" + (dots > 0 ? ".".repeat(dots) : "   ");
 
@@ -302,7 +309,8 @@ function ServerRow({
       </Box>
 
       {/* Error message for failed or reconnecting servers */}
-      {(status.status === "failed" || status.status === "reconnecting") && status.error ? (
+      {(status.status === t("ui.mcp.statusFailed") || status.status === t("ui.mcp.statusReconnecting")) &&
+      status.error ? (
         <ErrorRow error={status.error} />
       ) : null}
     </Box>
@@ -326,14 +334,14 @@ function ServerDetailView({
   columns: number;
 }): React.ReactElement {
   const [activeIndex, setActiveIndex] = React.useState(0);
-  const hasReconnect = server.status === "failed";
-  const canScroll = server.status === "ready";
+  const hasReconnect = server.status === t("ui.mcp.statusFailed");
+  const canScroll = server.status === t("ui.mcp.statusReady");
 
   // 合并所有 items（tools, prompts, resources）+ Reconnect 选项
   const allItems = useMemo(() => {
     const items: { type: string; name: string }[] = [];
     if (hasReconnect) {
-      items.push({ type: "action", name: "Reconnect" });
+      items.push({ type: "action", name: t("ui.mcp.reconnect") });
     }
     server.tools.forEach((tool) => items.push({ type: "tool", name: tool }));
     server.prompts.forEach((prompt) => items.push({ type: "prompt", name: prompt }));
@@ -412,13 +420,19 @@ function ServerDetailView({
   });
 
   const statusIcon =
-    server.status === "ready" ? "✓" : server.status === "failed" ? "✗" : server.status === "reconnecting" ? "↻" : "●";
+    server.status === t("ui.mcp.statusReady")
+      ? "✓"
+      : server.status === t("ui.mcp.statusFailed")
+        ? "✗"
+        : server.status === t("ui.mcp.statusReconnecting")
+          ? "↻"
+          : "●";
   const statusColor =
-    server.status === "ready"
+    server.status === t("ui.mcp.statusReady")
       ? "green"
-      : server.status === "failed"
+      : server.status === t("ui.mcp.statusFailed")
         ? "red"
-        : server.status === "reconnecting"
+        : server.status === t("ui.mcp.statusReconnecting")
           ? "#ff9900"
           : "yellow";
 
@@ -438,18 +452,19 @@ function ServerDetailView({
           <Text bold color="#229ac3" wrap="truncate-end">
             {server.name}
           </Text>
-          <Text dimColor>— {server.status === "ready" ? "Details" : "Status"}</Text>
+          <Text dimColor>— {server.status === t("ui.mcp.statusReady") ? "Details" : "Status"}</Text>
         </Box>
         {/* Server info */}
         <Box paddingX={1} marginLeft={3}>
           <Text wrap="truncate-end">
-            {server.status === "ready"
+            {server.status === t("ui.mcp.statusReady")
               ? `${server.toolCount} tools, ${server.promptCount} prompts, ${server.resourceCount} resources`
               : `Status: ${server.status}`}
           </Text>
         </Box>
         {/* Error for failed/reconnecting */}
-        {server.error && (server.status === "failed" || server.status === "reconnecting") ? (
+        {server.error &&
+        (server.status === t("ui.mcp.statusFailed") || server.status === t("ui.mcp.statusReconnecting")) ? (
           <Box paddingX={1} marginLeft={3}>
             <ErrorRow error={server.error} />
           </Box>
