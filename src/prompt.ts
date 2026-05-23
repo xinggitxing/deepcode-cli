@@ -1,12 +1,18 @@
-import { execFileSync, execSync } from "child_process";
+import { exec, execFile } from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { promisify } from "util";
 import ejs from "ejs";
 import { fileURLToPath } from "url";
 import type { SessionMessage } from "./session";
 import { findGitBashPath, resolveShellPath } from "./common/shell-utils";
 import { supportsMultimodal } from "./common/model-capabilities";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const execFileAsync = promisify(execFile) as (...args: any[]) => Promise<{ stdout: string; stderr: string }>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const execAsync = promisify(exec) as (...args: any[]) => Promise<{ stdout: string; stderr: string }>;
 
 const COMPACT_PROMPT_BASE = `Your task is to create a detailed summary of the conversation so far, paying close attention to the user's explicit requests and your previous actions.
 This summary should be thorough in capturing technical details, code patterns, and architectural decisions that would be essential for continuing development work without losing context.
@@ -185,11 +191,96 @@ export function getCompactPrompt(sessionMessages: SessionMessage[]): string {
   return `${COMPACT_PROMPT_BASE}\n\nconversation below:\n\n\`\`\`jsonl\n${jsonl}\n\`\`\``;
 }
 
-export function getRuntimeContext(projectRoot: string, model?: string): string {
-  const uname = getUnameInfo();
-  const shellPath = getShellPathInfo();
+// ─── Async Runtime Context (non-blocking, no permanent cache) ────────────
+// Each probe uses execFile (async) so the event loop is never blocked.
+// getRuntimeContext() re-computes every call — no permanent cache.
+// prewarmRuntimeContext() primes the first call; subsequent calls re-compute.
+
+let prewarmPromise: Promise<string> | null = null;
+
+async function getUnameInfoAsync(): Promise<string> {
+  try {
+    if (process.platform === "win32") {
+      const bashPath = findGitBashPath();
+      const { stdout } = await execFileAsync(bashPath, ["-lc", "uname -a"], {
+        encoding: "utf8",
+        windowsHide: true,
+      });
+      return stdout.trim();
+    }
+    const { stdout } = await execAsync("uname -a", { encoding: "utf8" });
+    return stdout.trim();
+  } catch {
+    return `${os.type()} ${os.release()} ${os.arch()}`;
+  }
+}
+
+async function getCommandVersionAsync(command: string, args: string[]): Promise<string | null> {
+  try {
+    if (process.platform === "win32") {
+      const bashPath = findGitBashPath();
+      const commandText = [command, ...args].map(shellSingleQuote).join(" ");
+      const { stdout } = await execFileAsync(bashPath, ["-lc", `${commandText} 2>&1`], {
+        encoding: "utf8",
+        windowsHide: true,
+      });
+      return stdout.trim();
+    }
+    const commandText = [command, ...args].map(shellSingleQuote).join(" ");
+    const { stdout } = await execAsync(`${commandText} 2>&1`, { encoding: "utf8" });
+    return stdout.trim();
+  } catch {
+    return null;
+  }
+}
+
+async function checkToolInstalledAsync(tool: string): Promise<boolean> {
+  try {
+    if (process.platform === "win32") {
+      const bashPath = findGitBashPath();
+      await execFileAsync(bashPath, ["-lc", `command -v ${shellSingleQuote(tool)}`], {
+        encoding: "utf8",
+        stdio: "ignore",
+        windowsHide: true,
+      });
+      return true;
+    }
+    await execAsync(`command -v ${tool}`, { encoding: "utf8", stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function getRuntimeVersionInfoAsync(): Promise<Record<string, string>> {
+  const versions: Record<string, string> = {};
+  const pythonVersion = await getCommandVersionAsync("python3", ["--version"]);
+  const nodeVersion = await getCommandVersionAsync("node", ["--version"]);
+  if (pythonVersion) {
+    versions["python3 version"] = pythonVersion.replace(/^Python\s+/i, "");
+  }
+  if (nodeVersion) {
+    versions["node version"] = nodeVersion;
+  }
+  return versions;
+}
+
+async function computeRuntimeEnvJson(projectRoot: string): Promise<string> {
+  // shellPath is sync, run first
+  let shellPath: string;
+  try {
+    shellPath = resolveShellPath();
+  } catch (error) {
+    shellPath = error instanceof Error ? error.message : String(error);
+  }
+
+  // uname, versions (python + node serially), rg, jq — each is async
+  const uname = await getUnameInfoAsync();
+  const runtimeVersions = await getRuntimeVersionInfoAsync();
+  const hasRg = await checkToolInstalledAsync("rg");
+  const hasJq = await checkToolInstalledAsync("jq");
+
   const shellModeOpts = process.platform === "win32" ? { "shell mode": "git-bash" } : {};
-  const runtimeVersions = getRuntimeVersionInfo();
   const env = {
     "root path": projectRoot,
     pwd: projectRoot,
@@ -199,44 +290,45 @@ export function getRuntimeContext(projectRoot: string, model?: string): string {
     ...shellModeOpts,
     ...runtimeVersions,
     "command installed": {
-      ripgrep: checkToolInstalled("rg"),
-      jq: checkToolInstalled("jq"),
+      ripgrep: hasRg,
+      jq: hasJq,
     },
   };
-  return `${getCurrentDateAndModelPrompt(model)}
-
-# Local Workspace Environment
-
-\`\`\`json
-${JSON.stringify(env, null, 2)}
-\`\`\``;
+  return JSON.stringify(env, null, 2);
 }
 
-function checkToolInstalled(tool: string): boolean {
-  try {
-    if (process.platform === "win32") {
-      const bashPath = findGitBashPath();
-      execFileSync(bashPath, ["-lc", `command -v ${shellSingleQuote(tool)}`], {
-        encoding: "utf8",
-        stdio: "ignore",
-        windowsHide: true,
-      });
-      return true;
+/** Start pre-computing the runtime environment JSON in the background.
+ *  Called once during SessionManager construction. The result is consumed
+ *  (and cleared) on the first getRuntimeContext() call. */
+export function prewarmRuntimeContext(projectRoot: string): void {
+  if (!prewarmPromise) {
+    prewarmPromise = computeRuntimeEnvJson(projectRoot).catch((err) => {
+      console.error("[prewarmRuntimeContext] Failed to pre-compute runtime environment:", err);
+      return "";
+    });
+  }
+}
+
+export async function getRuntimeContext(projectRoot: string, model?: string): Promise<string> {
+  // Consume the prewarm promise (once); subsequent calls re-compute.
+  let envJson: string;
+  if (prewarmPromise) {
+    const p = prewarmPromise;
+    prewarmPromise = null;
+    envJson = await p;
+    if (envJson) {
+      return formatRuntimeContext(envJson, model);
     }
-    execSync(`command -v ${tool}`, { encoding: "utf8", stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
   }
+  envJson = await computeRuntimeEnvJson(projectRoot);
+  return formatRuntimeContext(envJson, model);
 }
 
-function getShellPathInfo(): string {
-  try {
-    return resolveShellPath();
-  } catch (error) {
-    return error instanceof Error ? error.message : String(error);
-  }
+function formatRuntimeContext(envJson: string, model?: string): string {
+  return `${getCurrentDateAndModelPrompt(model)}\n\n# Local Workspace Environment\n\n\`\`\`json\n${envJson}\n\`\`\``;
 }
+
+// ─── Sync helpers (kept for backward compat) ──────────────────────────────
 
 function shellSingleQuote(value: string): string {
   return `'${value.replace(/'/g, "'\"'\"'")}'`;
