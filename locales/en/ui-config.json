@@ -11,7 +11,10 @@
       "currentLabel": "current",
       "localeEn": "English",
       "localeZhCN": "\u4e2d\u6587",
-      "categoryWithValue": "{label} ({value})"
+      "categoryWithValue": "{label} ({value})",
+      "languageUpdated": "Language: {locale}",
+      "thinkingLanguageUpdated": "Thinking language: {locale}",
+      "replyLanguageUpdated": "Reply language: {locale}"
     }
   }
 }

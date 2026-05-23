@@ -921,6 +921,7 @@ export const PromptInput = React.memo(function PromptInput({
         onLocaleChange={(locale) => onLocaleChange?.(locale)}
         onThinkingLocaleChange={(locale) => onThinkingLocaleChange?.(locale)}
         onReplyLocaleChange={(locale) => onReplyLocaleChange?.(locale)}
+        onStatusMessage={setStatusMessage}
       />
       <SlashCommandMenu width={screenWidth} items={slashMenu} activeIndex={menuIndex} />
       {!showFooterText && (

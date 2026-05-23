@@ -11,7 +11,10 @@
       "currentLabel": "当前",
       "localeEn": "English",
       "localeZhCN": "中文",
-      "categoryWithValue": "{label}（{value}）"
+      "categoryWithValue": "{label}（{value}）",
+      "languageUpdated": "语言：{locale}",
+      "thinkingLanguageUpdated": "推理语言：{locale}",
+      "replyLanguageUpdated": "回复语言：{locale}"
     }
   }
 }

@@ -51,6 +51,7 @@ type Props = {
   onLocaleChange: (locale: Locale) => void;
   onThinkingLocaleChange: (locale: Locale) => void;
   onReplyLocaleChange: (locale: Locale) => void;
+  onStatusMessage?: (message: string | null) => void;
 };
 
 const ConfigDropdown: React.FC<Props> = ({
@@ -63,6 +64,7 @@ const ConfigDropdown: React.FC<Props> = ({
   onLocaleChange,
   onThinkingLocaleChange,
   onReplyLocaleChange,
+  onStatusMessage,
 }) => {
   const [step, setStep] = useState<ConfigStep | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -108,18 +110,25 @@ const ConfigDropdown: React.FC<Props> = ({
       return;
     }
 
+    const localeDisplay = getLocaleDisplayName(locale.key);
     switch (selectedCategory) {
       case "locale":
         onLocaleChange(locale.key);
+        onStatusMessage?.(t("ui.config.languageUpdated", { locale: localeDisplay }));
         break;
       case "thinkingLocale":
         onThinkingLocaleChange(locale.key);
+        onStatusMessage?.(t("ui.config.thinkingLanguageUpdated", { locale: localeDisplay }));
         break;
       case "replyLocale":
         onReplyLocaleChange(locale.key);
+        onStatusMessage?.(t("ui.config.replyLanguageUpdated", { locale: localeDisplay }));
         break;
     }
-    onClose();
+    // Return to category selection after applying
+    setStep("category");
+    setActiveIndex(0);
+    setSelectedCategory(null);
   }
 
   useInput(
