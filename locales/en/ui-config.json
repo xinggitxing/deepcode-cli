@@ -1,0 +1,13 @@
+{
+  "ui": {
+    "config": {
+      "title": "Configuration",
+      "language": "Language",
+      "thinkingLanguage": "Thinking Language",
+      "replyLanguage": "Reply Language",
+      "selectLanguage": "Select Language",
+      "selectCategoryHelp": "Space/Enter select · Esc to cancel",
+      "selectLanguageHelp": "Space/Enter apply · Esc back"
+    }
+  }
+}

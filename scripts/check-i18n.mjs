@@ -4,12 +4,13 @@
  * check-i18n.mjs
  *
  * Validates i18n translation files:
- * 1. Checks that every key in en/index.json exists in zh-CN/index.json
- * 2. Reports missing keys
- * 3. Exits with code 1 if there are missing keys, 0 otherwise
+ * 1. Reads all *.json files from en/ and zh-CN/ directories
+ * 2. Checks that every flattened key in en/ exists in zh-CN/
+ * 3. Reports missing keys
+ * 4. Exits with code 1 if there are missing keys, 0 otherwise
  */
 
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync, readdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -30,13 +31,33 @@ function flattenKeys(obj, prefix = "") {
 }
 
 function loadLocale(locale) {
-  const filePath = resolve(localesDir, locale, "index.json");
-  if (!existsSync(filePath)) {
-    console.log(`[check-i18n] ${locale}/index.json not found, skipping.`);
+  const localePath = resolve(localesDir, locale);
+  if (!existsSync(localePath)) {
+    console.log(`[check-i18n] ${locale}/ directory not found, skipping.`);
     return {};
   }
-  const raw = JSON.parse(readFileSync(filePath, "utf8"));
-  return flattenKeys(raw);
+
+  const merged = {};
+  const files = readdirSync(localePath)
+    .filter((f) => f.endsWith(".json"))
+    .sort();
+
+  if (files.length === 0) {
+    console.log(`[check-i18n] No JSON files found in ${locale}/.`);
+    return {};
+  }
+
+  for (const file of files) {
+    const filePath = resolve(localePath, file);
+    try {
+      const content = JSON.parse(readFileSync(filePath, "utf8"));
+      Object.assign(merged, flattenKeys(content));
+    } catch (err) {
+      console.error(`[check-i18n] Error reading ${locale}/${file}: ${err.message}`);
+    }
+  }
+
+  return merged;
 }
 
 const enKeys = Object.keys(loadLocale("en"));
@@ -45,11 +66,11 @@ const zhKeys = new Set(Object.keys(loadLocale("zh-CN")));
 const missing = enKeys.filter((key) => !zhKeys.has(key));
 
 if (missing.length === 0) {
-  console.log(`[check-i18n] ✅ All ${enKeys.length} keys match between en/ and zh-CN/.`);
+  console.log(`[check-i18n] \u2705 All ${enKeys.length} keys match between en/ and zh-CN/.`);
   process.exit(0);
 }
 
-console.log(`[check-i18n] ❌ Missing ${missing.length} keys in zh-CN/ (compared to en/):`);
+console.log(`[check-i18n] \u274c Missing ${missing.length} keys in zh-CN/ (compared to en/):`);
 for (const key of missing) {
   console.log(`  - ${key}`);
 }

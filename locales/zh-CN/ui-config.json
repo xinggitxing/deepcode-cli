@@ -1,0 +1,13 @@
+{
+  "ui": {
+    "config": {
+      "title": "设置",
+      "language": "语言",
+      "thinkingLanguage": "推理语言",
+      "replyLanguage": "回复语言",
+      "selectLanguage": "选择语言",
+      "selectCategoryHelp": "空格/回车选择 · Esc 取消",
+      "selectLanguageHelp": "空格/回车确认 · Esc 返回"
+    }
+  }
+}
