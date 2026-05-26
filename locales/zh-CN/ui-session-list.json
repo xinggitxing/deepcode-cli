@@ -19,7 +19,13 @@
       "statusPending": "待处理",
       "statusWaiting": "等待中",
       "statusFailed": "失败",
-      "statusStopped": "已停止"
+      "statusStopped": "已停止",
+      "deleteConfirmHint": " [删除？Enter=是, Esc=否]",
+      "deleteTitle": "删除此会话？",
+      "confirmAction": " 确认 · ",
+      "cancelAction": " 取消",
+      "statusPermission": "等待中",
+      "statusDenied": "已拒绝"
     }
   }
 }

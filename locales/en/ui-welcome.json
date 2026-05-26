@@ -10,7 +10,8 @@
       "thinkingEnabled": "Thinking Enabled",
       "reasoningEffort": "Reasoning Effort",
       "model": "Model",
-      "cwd": "CWD"
+      "cwd": "CWD",
+      "tipsPrefix": "Tips: "
     }
   }
 }

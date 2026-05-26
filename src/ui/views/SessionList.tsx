@@ -248,11 +248,11 @@ export function SessionList({ sessions, onSelect, onCancel, onDelete }: Props): 
                   </Box>
                   <Box flexDirection="column" flexGrow={1}>
                     <Box width={"100%"}>
-	                      <Text {...(isSelected ? { bold: true } : {})} color={isSelected ? "#229ac3" : undefined}>
+                      <Text {...(isSelected ? { bold: true } : {})} color={isSelected ? "#229ac3" : undefined}>
                         {formatSessionTitle(session.summary || t("ui.sessionList.untitled"))}
                       </Text>
                       {isConfirming ? (
-                        <Text color="yellow"> [Delete? Enter=yes, Esc=no]</Text>
+                        <Text color="yellow">{t("ui.sessionList.deleteConfirmHint")}</Text>
                       ) : (
                         <Text dimColor> ({formatSessionStatus(session.status)})</Text>
                       )}
@@ -280,15 +280,15 @@ export function SessionList({ sessions, onSelect, onCancel, onDelete }: Props): 
         <Box flexDirection="column">
           {confirmDeleteSessionId ? (
             <Box>
-              <Text color="yellow">Delete this session? </Text>
+              <Text color="yellow">{t("ui.sessionList.deleteTitle")}</Text>
               <Text bold color="green">
                 Enter
               </Text>
-              <Text dimColor> to confirm · </Text>
+              <Text dimColor>{t("ui.sessionList.confirmAction")}</Text>
               <Text bold color="red">
                 Esc
               </Text>
-              <Text dimColor> to cancel</Text>
+              <Text dimColor>{t("ui.sessionList.cancelAction")}</Text>
             </Box>
           ) : hasActiveSearch ? (
             <Box>
@@ -296,7 +296,7 @@ export function SessionList({ sessions, onSelect, onCancel, onDelete }: Props): 
             </Box>
           ) : (
             <Box>
-	              <Text dimColor>{t("ui.sessionList.footerHelp")}</Text>
+              <Text dimColor>{t("ui.sessionList.footerHelp")}</Text>
             </Box>
           )}
         </Box>
@@ -336,9 +336,9 @@ export function formatSessionStatus(status: SessionStatus): string {
     case "interrupted":
       return t("ui.sessionList.statusStopped");
     case "ask_permission":
-      return "waiting";
+      return t("ui.sessionList.statusPermission");
     case "permission_denied":
-      return "denied";
+      return t("ui.sessionList.statusDenied");
     default:
       return status;
   }

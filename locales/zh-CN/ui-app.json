@@ -17,7 +17,8 @@
       "apiKeyNotFound": "未找到 OpenAI API key。请配置 ~/.deepcode/settings.json 或 ./.deepcode/settings.json。",
       "requestFailed": "请求失败：{error}",
       "pressEscExitRaw": "按 ESC 退出原始模式",
-      "noMessagesInSession": "（此会话暂无消息，开始聊天即可看到）"
+      "noMessagesInSession": "（此会话暂无消息，开始聊天即可看到）",
+      "permissionDenied": "权限已拒绝。添加回复后按 Enter 继续。"
     }
   }
 }

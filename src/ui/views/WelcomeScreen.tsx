@@ -79,7 +79,8 @@ export function WelcomeScreen({ projectRoot, settings, skills, width }: WelcomeS
         {tip ? (
           <Box marginTop={1}>
             <Text dimColor>
-              Tips: {tip.label} - {tip.description}
+              {t("ui.welcome.tipsPrefix")}
+              {tip.label} - {tip.description}
             </Text>
           </Box>
         ) : null}

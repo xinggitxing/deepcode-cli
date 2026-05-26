@@ -10,7 +10,8 @@
       "thinkingEnabled": "思考模式",
       "reasoningEffort": "思考努力程度",
       "model": "模型",
-      "cwd": "当前目录"
+      "cwd": "当前目录",
+      "tipsPrefix": "提示："
     }
   }
 }

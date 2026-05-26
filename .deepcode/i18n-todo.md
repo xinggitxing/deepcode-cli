@@ -23,7 +23,7 @@
 | `ui-welcome.json` | 🟢 | 🟢 | Phase 2 | WelcomeScreen | ✅ 完成 |
 | `ui-mcp.json` | 🟢 | 🟢 | Phase 2 | McpStatusList | ✅ 完成 |
 | `ui-slash-commands.json` | 🟢 | 🟢 | Phase 2 | slashCommands.ts | ✅ 完成 |
-| `ui-session-list.json` | 🟢 | 🟢 | Phase 2 | SessionList | ✅ 完成 |
+| `ui-session-list.json` | 🟢 | 🟢 | Phase 2 | SessionList | ⚠️ 部分（6处硬编码提示未翻译，见下方 §8 更新） |
 | `ui-ask-question.json` | 🟢 | 🟢 | Phase 2 | AskUserQuestionPrompt | ✅ 完成 |
 | `ui-process-stdout.json` | 🟢 | 🟢 | Phase 2 | ProcessStdoutView | ✅ 完成 |
 | `ui-update-prompt.json` | 🟢 | 🟢 | Phase 2 | UpdatePrompt | ✅ 完成 |
@@ -379,17 +379,29 @@
 
 **文件**: `src/ui/SessionList.tsx`
 
+> **更新 (2026-05-26)**：以下原始遗漏项已通过 `t()` 调用修复：escBack、total、matched、noMatch、untitled、above、below、footerHelp、statusDone/Running/Pending/Waiting/Failed/Stopped。✅
+
+**仍为硬编码的 tips（以下文本未经翻译）**：
+
+**8a. 会话行内删除确认提示**
 | 行号 | 硬编码文本 | 建议 key |
 |------|-----------|---------|
-| 162 | `"Press Esc to go back."` | `ui.sessionList.escBack` |
-| 185 | `"total"` | `ui.sessionList.total` |
-| 186 | `", {n} matched"`（参数化） | `ui.sessionList.matched` |
-| 213 | `'No sessions match "{query}".'`（参数化） | `ui.sessionList.noMatch` |
-| 229 | `"Untitled"` | `ui.sessionList.untitled` |
-| 243 | `"sessions above."`（参数化） | `ui.sessionList.above` |
-| 245 | `"sessions below."`（参数化） | `ui.sessionList.below` |
-| 253-259 | Footer 帮助文本 | `ui.sessionList.footerHelp` |
-| 284-301 | `formatSessionStatus()` 状态值 | `ui.sessionList.statusDone`/`Running`/`Pending`/`Waiting`/`Failed`/`Stopped` |
+| 254 | `" [Delete? Enter=yes, Esc=no]"` | `ui.sessionList.deleteConfirmHint` |
+
+**8b. Footer 删除确认帮助文本**
+| 行号 | 硬编码文本 | 建议 key |
+|------|-----------|---------|
+| 282 | `"Delete this session? "` | `ui.sessionList.deleteTitle` |
+| 286 | `" to confirm · "` | `ui.sessionList.confirmAction` |
+| 290 | `" to cancel"` | `ui.sessionList.cancelAction` |
+
+**8c. `formatSessionStatus()` 状态值 — 这两个未走 `t()` 翻译**
+| 行号 | 硬编码文本 | 建议 key |
+|------|-----------|---------|
+| 338 | `"waiting"`（`ask_permission` 状态） | `ui.sessionList.statusPermission` |
+| 340 | `"denied"`（`permission_denied` 状态） | `ui.sessionList.statusDenied` |
+
+> **共计 6 处硬编码字符串**，建议新增 6 个 translation key 到 `ui-session-list.json`。
 
 ### 9. UndoSelector (`/undo` 命令二级页面) — 几乎完全未翻译
 
@@ -423,6 +435,51 @@
 | 174 | `"timeout unavailable"` | `ui.processStdout.timeoutUnavailable` |
 | 176 | `"timeout {duration}"` | `ui.processStdout.timeoutHint` |
 | 183 | `"Timeout set to {duration}"` | `ui.processStdout.timeoutSet` |
+
+### 11. WelcomeScreen Tips 组件 — 遗漏翻译
+
+**文件**: `src/ui/WelcomeScreen.tsx`
+
+> **背景**：`buildWelcomeTips()` 生成的随机快捷键提示行，"Tips:" 前缀为硬编码英文。
+
+| 行号 | 硬编码文本 | 建议 key |
+|------|-----------|---------|
+| 82 | `"Tips: "`（第82行 `Tips: {tip.label} - {tip.description}`） | `ui.welcome.tipsPrefix` |
+
+> 快捷键描述已全部通过 `t("ui.welcome.*")` 翻译 ✅，仅前缀 "Tips:" 遗漏。
+
+### 12. PermissionPrompt（权限请求弹窗）— 完全未翻译
+
+**文件**: `src/ui/PermissionPrompt.tsx`
+
+> 该组件整体未接入 i18n，所有用户可见文本均为硬编码英文。
+
+| 行号 | 硬编码文本 | 建议 key |
+|------|-----------|---------|
+| 131 | `"Permission required"`（标题） | `ui.permissionPrompt.title` |
+| 142 | `"Do you want to proceed?"`（询问文案） | `ui.permissionPrompt.proceedQuestion` |
+| 153 | `"↑/↓ move · Enter select · Esc interrupt"`（底部帮助） | `ui.permissionPrompt.footerHelp` |
+| 182 | `"Yes"`（允许按钮） | `ui.permissionPrompt.allowLabel` |
+| 186 | `"Yes, and always allow "`（始终允许按钮） | `ui.permissionPrompt.alwaysAllowLabel` |
+| 191 | `"No"`（拒绝按钮） | `ui.permissionPrompt.denyLabel` |
+| 252 | `"reads inside this workspace"` | `ui.permissionPrompt.scopeReadInCwd` |
+| 254 | `"reads outside this workspace"` | `ui.permissionPrompt.scopeReadOutCwd` |
+| 256 | `"writes inside this workspace"` | `ui.permissionPrompt.scopeWriteInCwd` |
+| 258 | `"writes outside this workspace"` | `ui.permissionPrompt.scopeWriteOutCwd` |
+| 260 | `"deletes inside this workspace"` | `ui.permissionPrompt.scopeDeleteInCwd` |
+| 262 | `"deletes outside this workspace"` | `ui.permissionPrompt.scopeDeleteOutCwd` |
+| 264 | `"Git history queries"` | `ui.permissionPrompt.scopeQueryGitLog` |
+| 266 | `"Git history changes"` | `ui.permissionPrompt.scopeMutateGitLog` |
+| 268 | `"network access"` | `ui.permissionPrompt.scopeNetwork` |
+| 270 | `"MCP tool access"` | `ui.permissionPrompt.scopeMcp` |
+
+### 13. App.tsx — 遗漏状态消息
+
+**文件**: `src/ui/App.tsx`
+
+| 行号 | 硬编码文本 | 建议 key |
+|------|-----------|---------|
+| 706 | `"Permission denied. Add a reply, then press Enter to continue."` | `ui.app.permissionDenied` |
 
 ---
 
@@ -464,7 +521,7 @@
 | `ui.app.*` | 16 | 3 | 19% | 🔴 |
 | `ui.askUserQuestion.*` | 3 | 0 | 0% | 🔴 |
 | `ui.processStdout.*` | 4 | 0 | 0% | 🔴 |
-| `ui.sessionList.*` | 2 | 0 | 0% | 🔴 |
+| `ui.sessionList.*` | 19 | 19 | 100% | ✅ 全部使用；另有 6 处硬编码需新增 key（删除确认+waiting/denied） |
 | `ui.updatePrompt.*` | 1 | 0 | 0% | 🔴 |
 | `session.skillPromptHeader` | 1 | 0 | 0% | 🔴 |
 
@@ -492,8 +549,6 @@
 | `ui.mcp.serverList` | McpStatusList 使用字面量 `"server-list"` |
 | `ui.mcp.statusConnecting` | McpStatusList 字面量 |
 | `ui.slashCommands.continueDesc` | slashCommands.ts 第 62 行硬编码英文 |
-| `ui.sessionList.title` | SessionList 硬编码 |
-| `ui.sessionList.empty` | SessionList 硬编码 |
 | `ui.askUserQuestion.submit` | AskUserQuestionPrompt 硬编码 |
 | `ui.askUserQuestion.cancel` | AskUserQuestionPrompt 硬编码 |
 | `ui.askUserQuestion.selectOption` | AskUserQuestionPrompt 硬编码 |

@@ -19,7 +19,13 @@
       "statusPending": "pending",
       "statusWaiting": "waiting",
       "statusFailed": "failed",
-      "statusStopped": "stopped"
+      "statusStopped": "stopped",
+      "deleteConfirmHint": " [Delete? Enter=yes, Esc=no]",
+      "deleteTitle": "Delete this session? ",
+      "confirmAction": " to confirm · ",
+      "cancelAction": " to cancel",
+      "statusPermission": "waiting",
+      "statusDenied": "denied"
     }
   }
 }

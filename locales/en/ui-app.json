@@ -17,7 +17,8 @@
       "apiKeyNotFound": "OpenAI API key not found. Please configure ~/.deepcode/settings.json or ./.deepcode/settings.json.",
       "requestFailed": "Request failed: {error}",
       "pressEscExitRaw": "Press ESC to exit raw mode",
-      "noMessagesInSession": "(No messages in this session yet. Start chatting to see them here.)"
+      "noMessagesInSession": "(No messages in this session yet. Start chatting to see them here.)",
+      "permissionDenied": "Permission denied. Add a reply, then press Enter to continue."
     }
   }
 }

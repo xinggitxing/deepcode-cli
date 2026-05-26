@@ -68,7 +68,7 @@ export type ResolvedDeepcodingSettings = {
   notify?: string;
   webSearchTool?: string;
   mcpServers?: Record<string, McpServerConfig>;
-	  permissions: Required<PermissionSettings>;
+  permissions: Required<PermissionSettings>;
   locale: Locale;
   thinkingLocale: Locale;
   replyLocale: Locale;
@@ -357,7 +357,7 @@ export function resolveSettingsSources(
     notify: notify || undefined,
     webSearchTool: webSearchTool || undefined,
     mcpServers: mergeMcpServers(userSettings, projectSettings, userEnv, projectEnv, systemEnv),
-	    permissions: mergePermissions(userSettings, projectSettings),
+    permissions: mergePermissions(userSettings, projectSettings),
     locale: resolveLocale(locale),
     thinkingLocale: resolveLocale(thinkingLocale),
     replyLocale: resolveLocale(replyLocale),

@@ -574,7 +574,7 @@ function App({ projectRoot, initialPrompt, onRestart }: AppProps): React.ReactEl
         if (nextMode === RawMode.Raw) {
           // Write all messages directly to stdout for raw scrollback mode.
           const allMessages = activeSessionId ? loadVisibleMessages(sessionManager, activeSessionId) : [];
-	          renderRawModeMessages(allMessages, nextMode);
+          renderRawModeMessages(allMessages, nextMode);
         } else if (activeSessionId) {
           // Switch to chat view to render messages.
           handleSelectSession(activeSessionId);
@@ -610,7 +610,7 @@ function App({ projectRoot, initialPrompt, onRestart }: AppProps): React.ReactEl
       process.stdout.write(ANSI_CLEAR_SCREEN);
       const activeSessionId = sessionManager.getActiveSessionId();
       const allMessages = activeSessionId ? loadVisibleMessages(sessionManager, activeSessionId) : [];
-	      renderRawModeMessages(allMessages, mode);
+      renderRawModeMessages(allMessages, mode);
       return;
     }
 
@@ -702,7 +702,8 @@ function App({ projectRoot, initialPrompt, onRestart }: AppProps): React.ReactEl
           permissions: result.permissions,
           alwaysAllows: result.alwaysAllows,
         });
-        setStatusLine("Permission denied. Add a reply, then press Enter to continue.");
+        setStatusLine(t("ui.app.permissionDenied"));
+        setPromptDraft(null);
         sessionManager.denySessionPermission(sessionId);
         return;
       }
