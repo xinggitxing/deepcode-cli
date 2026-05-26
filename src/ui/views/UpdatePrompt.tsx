@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box, Text, useApp, useInput } from "ink";
-import { t } from "../common/i18n";
+import { t } from "../../common/i18n";
 
 export type UpdatePromptChoice = "install" | "ignore-once" | "ignore-version";
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useInput } from "ink";
-import DropdownMenu from "../../DropdownMenu";
+import DropdownMenu from "../DropdownMenu";
 import { t, type Locale } from "../../../common/i18n";
 
 type ConfigStep = "category" | "language";

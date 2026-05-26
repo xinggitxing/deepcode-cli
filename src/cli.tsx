@@ -5,7 +5,7 @@ import { checkForNpmUpdate, promptForPendingUpdate, type PackageInfo } from "./c
 import { AppContainer } from "./ui";
 import { t } from "./common/i18n";
 import { initI18n } from "./common/i18n";
-import { resolveCurrentSettings } from "./ui/App";
+import { resolveCurrentSettings } from "./ui/views/App";
 
 const args = process.argv.slice(2);
 const packageInfo = readPackageInfo();

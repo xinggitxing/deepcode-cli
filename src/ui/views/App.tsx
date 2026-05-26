@@ -26,16 +26,12 @@ import { useI18n } from "../contexts/i18n";
 import { t } from "../../common/i18n";
 import type { Locale } from "../../common/i18n";
 import { renderMessageToStdout } from "../components/MessageView/utils";
-import {
-  buildPromptDraftFromSessionMessage,
-  buildStatusLine,
-  buildSyntheticUserMessage,
-  formatModelConfig,
-  isCurrentSessionEmpty,
-  renderRawModeMessages,
-} from "../utils";
-import { resolveCurrentSettings, writeModelConfigSelection } from "../../settings";
-import { isCollapsedThinking } from "../core/thinking-state";
+import { renderRawModeMessages } from "../utils";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
+import type { DeepcodingSettings, ResolvedDeepcodingSettings } from "../../settings";
+import { applyModelConfigSelection, resolveSettingsSources, DEFAULT_MODEL, DEFAULT_BASE_URL } from "../../settings";
 import { ANSI_CLEAR_SCREEN } from "../constants";
 import type {
   LlmStreamProgress,
@@ -987,7 +983,7 @@ export function resolveCurrentSettings(projectRoot: string = process.cwd()): Res
   );
 }
 
-export { createOpenAIClient } from "../common/openai-client";
+export { createOpenAIClient } from "../../common/openai-client";
 
 function getUserSettingsPath(): string {
   return path.join(os.homedir(), ".deepcode", "settings.json");

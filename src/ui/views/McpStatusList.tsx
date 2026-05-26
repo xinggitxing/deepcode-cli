@@ -1,4 +1,4 @@
-import { t } from "../common/i18n";
+import { t } from "../../common/i18n";
 import React, { useState, useMemo, useCallback } from "react";
 import { Box, Text, useInput, useWindowSize } from "ink";
 import type { McpServerStatus } from "../../mcp/mcp-manager";

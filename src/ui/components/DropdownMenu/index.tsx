@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Box, Text } from "ink";
-import { displayWidth } from "../common/display-width";
-import { t } from "../common/i18n";
+import { displayWidth } from "../../../common/display-width";
+import { t } from "../../../common/i18n";
 
 /**
  * Generic dropdown menu item structure
