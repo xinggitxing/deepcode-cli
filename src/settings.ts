@@ -55,6 +55,7 @@ export type DeepcodingSettings = {
   locale?: string;
   thinkingLocale?: string;
   replyLocale?: string;
+  enhancedLangInstructions?: boolean;
 };
 
 export type ResolvedDeepcodingSettings = {
@@ -72,6 +73,7 @@ export type ResolvedDeepcodingSettings = {
   locale: Locale;
   thinkingLocale: Locale;
   replyLocale: Locale;
+  enhancedLangInstructions: boolean;
 };
 
 export type ModelConfigSelection = {
@@ -346,6 +348,12 @@ export function resolveSettingsSources(
     trimString(userSettings?.replyLocale) ||
     (locale as Locale);
 
+  const enhancedLangInstructions =
+    parseBoolean(systemEnv.ENHANCED_LANG_INSTRUCTIONS) ??
+    parseBoolean(projectSettings?.enhancedLangInstructions) ??
+    parseBoolean(userSettings?.enhancedLangInstructions) ??
+    true;
+
   return {
     env,
     apiKey: trimString(env.API_KEY) || undefined,
@@ -361,6 +369,7 @@ export function resolveSettingsSources(
     locale: resolveLocale(locale),
     thinkingLocale: resolveLocale(thinkingLocale),
     replyLocale: resolveLocale(replyLocale),
+    enhancedLangInstructions,
   };
 }
 

@@ -94,9 +94,11 @@ type Props = {
   onLocaleChange?: (locale: Locale) => void;
   onThinkingLocaleChange?: (locale: Locale) => void;
   onReplyLocaleChange?: (locale: Locale) => void;
+  onEnhancedLangChange?: (enabled: boolean) => void;
   currentLocale?: Locale;
   currentThinkingLocale?: Locale;
   currentReplyLocale?: Locale;
+  enhancedLangEnabled?: boolean;
 };
 
 const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
@@ -139,9 +141,11 @@ export const PromptInput = React.memo(function PromptInput({
   onLocaleChange,
   onThinkingLocaleChange,
   onReplyLocaleChange,
+  onEnhancedLangChange,
   currentLocale,
   currentThinkingLocale,
   currentReplyLocale,
+  enhancedLangEnabled,
 }: Props): React.ReactElement {
   const { exit } = useApp();
   const { stdout } = useStdout();
@@ -816,11 +820,13 @@ export const PromptInput = React.memo(function PromptInput({
         currentLocale={currentLocale ?? "en"}
         currentThinkingLocale={currentThinkingLocale ?? "en"}
         currentReplyLocale={currentReplyLocale ?? "en"}
+        enhancedLangEnabled={enhancedLangEnabled ?? true}
         width={screenWidth}
         onClose={() => setShowConfigDropdown(false)}
         onLocaleChange={(locale) => onLocaleChange?.(locale)}
         onThinkingLocaleChange={(locale) => onThinkingLocaleChange?.(locale)}
         onReplyLocaleChange={(locale) => onReplyLocaleChange?.(locale)}
+        onEnhancedLangChange={(enabled) => onEnhancedLangChange?.(enabled)}
         onStatusMessage={setStatusMessage}
       />
       <SlashCommandMenu width={screenWidth} items={slashMenu} activeIndex={menuIndex} />

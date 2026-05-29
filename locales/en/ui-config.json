@@ -5,16 +5,21 @@
       "language": "Language",
       "thinkingLanguage": "Thinking Language",
       "replyLanguage": "Reply Language",
+      "enhancedLangInstructions": "Enhanced Lang Instructions",
       "selectLanguage": "Select Language",
       "selectCategoryHelp": "Space/Enter select · Esc to cancel",
       "selectLanguageHelp": "Space/Enter apply · Esc back",
       "currentLabel": "current",
       "localeEn": "English",
-      "localeZhCN": "\u4e2d\u6587",
+      "localeZhCN": "中文",
       "categoryWithValue": "{label} ({value})",
       "languageUpdated": "Language: {locale}",
       "thinkingLanguageUpdated": "Thinking language: {locale}",
-      "replyLanguageUpdated": "Reply language: {locale}"
+      "replyLanguageUpdated": "Reply language: {locale}",
+      "enhancedLangInstructionsEnabled": "Enabled",
+      "enhancedLangInstructionsDisabled": "Disabled",
+      "enhancedLangInstructionsUpdated": "Enhanced lang instructions: {value}",
+      "enhancedLangInstructionsDescription": "Inject lang instructions into each user message (costs ~20 tokens/turn)"
     }
   }
 }

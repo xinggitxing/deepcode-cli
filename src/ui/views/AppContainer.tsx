@@ -12,7 +12,17 @@ const AppContainer: React.FC<{
   initialLocale?: Locale;
   initialThinkingLocale?: Locale;
   initialReplyLocale?: Locale;
-}> = ({ version, projectRoot, initialPrompt, onRestart, initialLocale, initialThinkingLocale, initialReplyLocale }) => {
+  initialEnhancedLangEnabled?: boolean;
+}> = ({
+  version,
+  projectRoot,
+  initialPrompt,
+  onRestart,
+  initialLocale,
+  initialThinkingLocale,
+  initialReplyLocale,
+  initialEnhancedLangEnabled,
+}) => {
   return (
     <AppContext.Provider value={{ version: version }}>
       <RawModeProvider>
@@ -20,6 +30,7 @@ const AppContainer: React.FC<{
           initialLocale={initialLocale ?? "en"}
           initialThinkingLocale={initialThinkingLocale}
           initialReplyLocale={initialReplyLocale}
+          initialEnhancedLangEnabled={initialEnhancedLangEnabled}
         >
           <App initialPrompt={initialPrompt} projectRoot={projectRoot} onRestart={onRestart} />
         </I18nProvider>

@@ -17,6 +17,7 @@ const localeCache = new Map<string, Record<string, string>>();
 let currentLocale: Locale = "en";
 let thinkingLocale: Locale = "en";
 let replyLocale: Locale = "en";
+let enhancedLangEnabled = true;
 
 // --------------- Helpers ---------------
 
@@ -178,9 +179,43 @@ export function resetI18n(): void {
   currentLocale = "en";
   thinkingLocale = "en";
   replyLocale = "en";
+  enhancedLangEnabled = true;
 }
 
 /** Detect locale from environment. */
 export function getDetectedLocale(): Locale {
   return detectLocale();
+}
+
+/** Get whether enhanced language instructions are enabled. */
+export function isEnhancedLangEnabled(): boolean {
+  return enhancedLangEnabled;
+}
+
+/** Enable or disable enhanced language instruction injection. */
+export function setEnhancedLangEnabled(enabled: boolean): void {
+  enhancedLangEnabled = enabled;
+}
+
+/**
+ * Build language instruction strings for the current thinking/reply locale settings.
+ * Returns an array of non-empty instruction strings (e.g. "重要：推理请使用中文。").
+ * When a locale is "en", no instruction is emitted (English is the default).
+ * When enhanced mode is disabled, returns empty array (saves tokens).
+ * Used to inject language guidance into system prompts, compact prompts, and user messages.
+ */
+export function buildLanguageInstructionStrings(): string[] {
+  if (!enhancedLangEnabled) {
+    return [];
+  }
+  const parts: string[] = [];
+  const thinkLocale = getThinkingLocale();
+  const replyLocale = getReplyLocale();
+  if (thinkLocale !== "en") {
+    parts.push(t("prompt.thinkingLanguageInstruction", undefined, thinkLocale));
+  }
+  if (replyLocale !== "en") {
+    parts.push(t("prompt.replyLanguageInstruction", undefined, replyLocale));
+  }
+  return parts;
 }

@@ -4,6 +4,7 @@ import {
   t,
   setThinkingLocale as setGlobalThinkingLocale,
   setReplyLocale as setGlobalReplyLocale,
+  setEnhancedLangEnabled as setGlobalEnhancedLangEnabled,
   type Locale,
   type TranslationKey,
 } from "../../common/i18n";
@@ -16,6 +17,8 @@ export type I18nContextValue = {
   replyLocale: Locale;
   setThinkingLocale: (locale: Locale) => void;
   setReplyLocale: (locale: Locale) => void;
+  enhancedLangEnabled: boolean;
+  setEnhancedLangEnabled: (enabled: boolean) => void;
 };
 
 const I18nContext = createContext<I18nContextValue>({
@@ -26,6 +29,8 @@ const I18nContext = createContext<I18nContextValue>({
   replyLocale: "en",
   setThinkingLocale: () => {},
   setReplyLocale: () => {},
+  enhancedLangEnabled: true,
+  setEnhancedLangEnabled: () => {},
 });
 
 export function I18nProvider({
@@ -33,15 +38,18 @@ export function I18nProvider({
   initialLocale,
   initialThinkingLocale,
   initialReplyLocale,
+  initialEnhancedLangEnabled,
 }: {
   children: React.ReactNode;
   initialLocale: Locale;
   initialThinkingLocale?: Locale;
   initialReplyLocale?: Locale;
+  initialEnhancedLangEnabled?: boolean;
 }): React.ReactElement {
   const [locale, setLocaleState] = useState(initialLocale);
   const [tLocale, setTLocaleState] = useState(initialThinkingLocale ?? initialLocale);
   const [rLocale, setRLocaleState] = useState(initialReplyLocale ?? initialLocale);
+  const [enhancedState, setEnhancedState] = useState(initialEnhancedLangEnabled ?? true);
 
   const setLocale = useCallback(
     (newLocale: Locale) => {
@@ -61,6 +69,11 @@ export function I18nProvider({
     setRLocaleState(locale);
   }, []);
 
+  const setEnhanced = useCallback((enabled: boolean) => {
+    setGlobalEnhancedLangEnabled(enabled);
+    setEnhancedState(enabled);
+  }, []);
+
   return (
     <I18nContext.Provider
       value={{
@@ -71,6 +84,8 @@ export function I18nProvider({
         replyLocale: rLocale,
         setThinkingLocale,
         setReplyLocale,
+        enhancedLangEnabled: enhancedState,
+        setEnhancedLangEnabled: setEnhanced,
       }}
     >
       {children}

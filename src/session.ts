@@ -3,7 +3,7 @@ import * as path from "path";
 import * as os from "os";
 import * as crypto from "crypto";
 import { fileURLToPath } from "url";
-import { t } from "./common/i18n";
+import { t, buildLanguageInstructionStrings } from "./common/i18n";
 import matter from "gray-matter";
 import ejs from "ejs";
 import type { ChatCompletionMessageParam, ChatCompletionContentPart } from "openai/resources/chat/completions";
@@ -2304,9 +2304,18 @@ ${skillMd}
     model: string
   ): ChatCompletionMessageParam {
     const content = this.renderOpenAIMessageContent(message);
+    // Inject language instruction into user messages (in-memory only, not persisted)
+    // Places the instruction adjacent to the user input that triggers reasoning.
+    let enhancedContent = content;
+    if (message.role === "user") {
+      const langParts = buildLanguageInstructionStrings();
+      if (langParts.length > 0) {
+        enhancedContent = content ? `${langParts.join("\n")}\n\n${content}` : langParts.join("\n");
+      }
+    }
     const base: ChatCompletionMessageParam = {
       role: message.role,
-      content,
+      content: enhancedContent,
     } as ChatCompletionMessageParam;
 
     const messageParams = message.messageParams as
@@ -2329,8 +2338,8 @@ ${skillMd}
 
     if ((message.role === "user" || message.role === "system") && message.contentParams) {
       const contentParts: ChatCompletionContentPart[] = [];
-      if (content) {
-        contentParts.push({ type: "text", text: content });
+      if (enhancedContent) {
+        contentParts.push({ type: "text", text: enhancedContent });
       }
       const params = Array.isArray(message.contentParams) ? message.contentParams : [message.contentParams];
       for (const param of params) {
@@ -2339,7 +2348,8 @@ ${skillMd}
           contentParts.push(part);
         }
       }
-      const contentValue: string | ChatCompletionContentPart[] = contentParts.length > 0 ? contentParts : content;
+      const contentValue: string | ChatCompletionContentPart[] =
+        contentParts.length > 0 ? contentParts : enhancedContent;
       (base as { content: string | ChatCompletionContentPart[] }).content = contentValue;
     }
 

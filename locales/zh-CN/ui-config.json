@@ -5,6 +5,7 @@
       "language": "语言",
       "thinkingLanguage": "推理语言",
       "replyLanguage": "回复语言",
+      "enhancedLangInstructions": "增强语言指令",
       "selectLanguage": "选择语言",
       "selectCategoryHelp": "空格/回车选择 · Esc 取消",
       "selectLanguageHelp": "空格/回车确认 · Esc 返回",
@@ -14,7 +15,11 @@
       "categoryWithValue": "{label}（{value}）",
       "languageUpdated": "语言：{locale}",
       "thinkingLanguageUpdated": "推理语言：{locale}",
-      "replyLanguageUpdated": "回复语言：{locale}"
+      "replyLanguageUpdated": "回复语言：{locale}",
+      "enhancedLangInstructionsEnabled": "启用",
+      "enhancedLangInstructionsDisabled": "关闭",
+      "enhancedLangInstructionsUpdated": "增强语言指令：{value}",
+      "enhancedLangInstructionsDescription": "在每轮用户消息前注入语言指令（每轮约 20 token 开销）"
     }
   }
 }

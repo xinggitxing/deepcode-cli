@@ -58,7 +58,16 @@ function App({ projectRoot, initialPrompt, onRestart }: AppProps): React.ReactEl
   const { stdout, write } = useStdout();
   const { columns, rows } = useWindowSize();
   const { mode, setMode } = useRawModeContext();
-  const { locale, setLocale, thinkingLocale, replyLocale, setThinkingLocale, setReplyLocale } = useI18n();
+  const {
+    locale,
+    setLocale,
+    thinkingLocale,
+    replyLocale,
+    setThinkingLocale,
+    setReplyLocale,
+    enhancedLangEnabled,
+    setEnhancedLangEnabled,
+  } = useI18n();
   const initialPromptSubmittedRef = useRef(false);
   const processStdoutRef = useRef<Map<number, string>>(new Map());
   const rawModeRef = useRef<RawMode>(mode);
@@ -401,6 +410,15 @@ function App({ projectRoot, initialPrompt, onRestart }: AppProps): React.ReactEl
       writeSettings({ ...(rawSettings ?? {}), replyLocale: newLocale });
     },
     [setReplyLocale]
+  );
+
+  const handleEnhancedLangChange = useCallback(
+    (enabled: boolean): void => {
+      setEnhancedLangEnabled(enabled);
+      const rawSettings = readSettings();
+      writeSettings({ ...(rawSettings ?? {}), enhancedLangInstructions: enabled });
+    },
+    [setEnhancedLangEnabled]
   );
 
   const handleModelConfigChange = useCallback(
@@ -833,9 +851,11 @@ function App({ projectRoot, initialPrompt, onRestart }: AppProps): React.ReactEl
           currentLocale={locale}
           currentThinkingLocale={thinkingLocale}
           currentReplyLocale={replyLocale}
+          enhancedLangEnabled={enhancedLangEnabled}
           onLocaleChange={handleLocaleChange}
           onThinkingLocaleChange={handleThinkingLocaleChange}
           onReplyLocaleChange={handleReplyLocaleChange}
+          onEnhancedLangChange={handleEnhancedLangChange}
         />
       )}
     </Box>

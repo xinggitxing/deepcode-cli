@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 import type { SessionMessage } from "./session";
 import { findGitBashPath, resolveShellPath } from "./common/shell-utils";
 import { supportsMultimodal } from "./common/model-capabilities";
-import { t, getThinkingLocale, getReplyLocale } from "./common/i18n";
+import { t, getThinkingLocale, getReplyLocale, buildLanguageInstructionStrings } from "./common/i18n";
 
 const COMPACT_PROMPT_BASE = `Your task is to create a detailed summary of the conversation so far, paying close attention to the user's explicit requests and your previous actions.
 This summary should be thorough in capturing technical details, code patterns, and architectural decisions that would be essential for continuing development work without losing context.
@@ -176,6 +176,10 @@ export function getSystemPrompt(_projectRoot: string, options: PromptToolOptions
 }
 
 export function getCompactPrompt(sessionMessages: SessionMessage[]): string {
+  // Inject language instruction so the compaction summary respects user language preference
+  const langParts = buildLanguageInstructionStrings();
+  const langInstruction = langParts.length > 0 ? `${langParts.join("\n")}\n\n` : "";
+
   const jsonl = sessionMessages
     .map((message) =>
       JSON.stringify({
@@ -188,7 +192,7 @@ export function getCompactPrompt(sessionMessages: SessionMessage[]): string {
       })
     )
     .join("\n");
-  return `${COMPACT_PROMPT_BASE}\n\nconversation below:\n\n\`\`\`jsonl\n${jsonl}\n\`\`\``;
+  return `${langInstruction}${COMPACT_PROMPT_BASE}\n\nconversation below:\n\n\`\`\`jsonl\n${jsonl}\n\`\`\``;
 }
 
 export function getRuntimeContext(projectRoot: string, model?: string): string {

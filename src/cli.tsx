@@ -3,8 +3,7 @@ import { render } from "ink";
 import { setShellIfWindows } from "./common/shell-utils";
 import { checkForNpmUpdate, promptForPendingUpdate, type PackageInfo } from "./common/update-check";
 import { AppContainer } from "./ui";
-import { t } from "./common/i18n";
-import { initI18n } from "./common/i18n";
+import { t, initI18n, setEnhancedLangEnabled } from "./common/i18n";
 import { resolveCurrentSettings } from "./ui/views/App";
 
 const args = process.argv.slice(2);
@@ -103,6 +102,7 @@ async function main(): Promise<void> {
       thinkingLocale: settings.thinkingLocale,
       replyLocale: settings.replyLocale,
     });
+    setEnhancedLangEnabled(settings.enhancedLangInstructions);
 
     const inkInstance = render(
       <AppContainer
@@ -113,6 +113,7 @@ async function main(): Promise<void> {
         initialLocale={settings.locale}
         initialThinkingLocale={settings.thinkingLocale}
         initialReplyLocale={settings.replyLocale}
+        initialEnhancedLangEnabled={settings.enhancedLangInstructions}
       />,
       { exitOnCtrlC: false }
     );
